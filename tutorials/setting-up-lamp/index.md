@@ -25,7 +25,7 @@ Alternatively, you can use options from the
 
 ## Prerequisites
 
-1.  [Select or create a Google Cloud project.](https://cloud.console.google.com/projectselector2/home/dashboard)
+1.  [Select or create a Google Cloud project.](https://console.cloud.google.com/projectselector2/home/dashboard)
 
 1.  [Enable billing for your project.](https://support.google.com/cloud/answer/6293499#enable-billing)
 
@@ -166,6 +166,20 @@ During the installation, configure phpMyAdmin as follows:
   + Use the spacebar to select **apache2** and the tab key to move the cursor.
   + Select **Yes** to use `dbconfig-common` for database setup.
   + Enter a password for the phpMyAdmin application, and make a note of the password.
+
+After installation, complete the configuration:
+
+1.  Uncomment the following line in your server's `php.ini` file by removing the leading `;` character: 
+
+        ;extension=mysqli
+
+1.  Include the phpMyAdmin configuration in your `apache2.conf` file by adding the following line:
+
+        Include /etc/phpmyadmin/apache.conf
+
+1.  Restart Apache:
+
+        sudo systemctl restart apache2
 
 #### Test phpMyAdmin
 

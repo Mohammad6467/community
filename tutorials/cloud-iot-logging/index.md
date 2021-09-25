@@ -15,7 +15,7 @@ This tutorial demonstrates how to configure Cloud Functions for Firebase to rela
 
 ## Objectives
 
-- Send application logs from device software over [MQTT](https://www.mqtt.com/) and IoT Core
+- Send application logs from device software over [MQTT](https://www.mqtt.org/) and IoT Core
 - View device logs in Cloud Logging
 - Use sorting and searching features of Cloud Logging to find logs of interest
 - Use the monitored resource type for IoT devices to see multiple log entries from different sources for a given device
@@ -25,13 +25,13 @@ This tutorial demonstrates how to configure Cloud Functions for Firebase to rela
 
 ## Before you begin
 
-This tutorial assumes you already have a Google Cloud Platform (GCP) account set up and have completed the IoT Core [quickstart](https://cloud.google.com/iot/docs/quickstart).
+This tutorial assumes you already have a Google Cloud account set up and have completed the IoT Core [quickstart](https://cloud.google.com/iot/docs/quickstart).
 
-You need to associate Firebase to your GCP project. Visit the [Firebase Console](https://console.firebase.google.com/?authuser=0) and choose to add a project. You can then choose to add Firebase to an existing GCP project.
+You need to associate Firebase to your Google Cloud project. Visit the [Firebase Console](https://console.firebase.google.com/?authuser=0) and choose to add a project. You can then choose to add Firebase to an existing Google Cloud project.
 
 ## Costs
 
-This tutorial uses billable components of GCP, including the following:
+This tutorial uses billable components of Google Cloud, including the following:
 
 - IoT Core
 - Pub/Sub
@@ -44,7 +44,20 @@ This tutorial should not generate any usage that would not be covered by the [fr
 
 If you do not already have a development environment set up with [gcloud](https://cloud.google.com/sdk/downloads) and [Firebase](https://firebase.google.com/docs/cli/) tools, it is recommended that you use [Cloud Shell](https://cloud.google.com/shell/docs/) for any command line instructions.
 
-Set the name of the Cloud IoT Core settings you are using to environment variables:
+### Get the sample code
+
+The sample code for this tutorial is in the
+[Google Cloud Community GitHub repository](https://github.com/GoogleCloudPlatform/community/tree/master/tutorials/metrics-export-with-mql).
+
+1.  Clone the repository:
+
+        git clone https://github.com/GoogleCloudPlatform/community.git
+
+1.  Go to the tutorial directory:
+
+        cd community/tutorials/cloud-iot-logging
+
+### Set the environment variables
 
 ```sh
 export REGISTRY_ID=[your registry here]
@@ -78,17 +91,14 @@ The main part of the function handles a Pub/Sub message from IoT Core, extracts 
 [embedmd]:# (functions/src/index.ts /import/ $)
 ```ts
 import * as functions from 'firebase-functions';
-const loggingClient = require('@google-cloud/logging');
-
-import { runInDebugContext } from 'vm';
+const { Logging } = require('@google-cloud/logging');
 
 // create the Cloud Logging client
-const logging = new loggingClient({
+const logging = new Logging({
   projectId: process.env.GCLOUD_PROJECT,
 });
 
 // start cloud function
-
 exports.deviceLog =
   functions.pubsub.topic('device-logs').onPublish((message) => {
     const log = logging.log('device-logs');
@@ -102,13 +112,13 @@ exports.deviceLog =
           device_num_id: message.attributes.deviceNumId,
           device_registry_id: message.attributes.deviceRegistryId,
           location: message.attributes.location,
-        }
+        },
       },
       labels: {
         // note device_id is not part of the monitored resource, but you can
         // include it as another log label
         device_id: message.attributes.deviceId,
-      }
+      },
     };
     const logData = message.json;
 
@@ -116,7 +126,7 @@ exports.deviceLog =
     // is present
     const validSeverity = [
       'DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'ALERT', 'CRITICAL',
-      'EMERGENCY'
+      'EMERGENCY',
     ];
     if (logData.severity &&
       validSeverity.indexOf(logData.severity.toUpperCase()) > -1) {
@@ -124,7 +134,7 @@ exports.deviceLog =
       delete (logData.severity);
 
 
-      // write the log entryto Cloud Logging
+      // write the log entry to Cloud Logging
       const entry = log.entry(metadata, logData);
       return log.write(entry);
     }
@@ -181,7 +191,7 @@ Now in just a few moments, you will see two new entries in Cloud Logging. One is
 
 This is then followed by a device application log reporting the imaginary "spring back" value. This shows how we can view both system logs from IoT Core and device application logs in one place.
 
-You can use the refresh button in the GCP Console, or use the play button to stream logs.
+You can use the refresh button in the Google Cloud Console, or use the play button to stream logs.
 
 ![console image](https://storage.googleapis.com/gcp-community/tutorials/cloud-iot-logging/c4.png)
 
